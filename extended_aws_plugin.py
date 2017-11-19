@@ -25,7 +25,7 @@ import logging
 
 class AthenaStartQueryOperator(BaseOperator):
 
-    template_fields = ['query']
+    template_fields = ['query', 'output_location']
     template_ext = ['.sql']
     ui_color = '#FFFF00'
 
