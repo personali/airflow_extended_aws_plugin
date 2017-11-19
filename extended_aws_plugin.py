@@ -23,6 +23,44 @@ import time
 import logging
 
 
+class AthenaStartQueryOperator(BaseOperator):
+
+    template_fields = ['query']
+    template_ext = ['.sql']
+    ui_color = '#FFFF00'
+
+    @apply_defaults
+    def __init__(self,
+                 database_name,
+                 query,
+                 output_location,
+                 aws_conn_id='s3_default',
+                 **kwargs
+                 ):
+        """
+
+        :param aws_conn_id: Airflow connection id specifying credentials to AWS account
+        :param database_name: Athena/Glue database to run the query on
+        :param query_string: query to run
+        """
+        super(AthenaStartQueryOperator, self).__init__(**kwargs)
+        self.aws_conn_id = aws_conn_id
+        self.database_name = database_name
+        self.query = query
+        self.output_location = output_location
+
+    def execute(self, context):
+        logging.info("Starting Athena query: %s",self.query)
+        aws = AwsHook(aws_conn_id=self.aws_conn_id)
+        athena = aws.get_client_type('athena')
+        response = athena.start_query_execution(
+            QueryString=self.query,
+            QueryExecutionContext={'Database': self.database_name},
+            ResultConfiguration={'OutputLocation': self.output_location}
+        )
+        logging.info("Got response: %s", response)
+
+
 class ExtendedEmrCreateJobFlowOperator(BaseOperator):
     TERMINATE_STATES = ['TERMINATING', 'TERMINATED', 'TERMINATED_WITH_ERRORS']
 
@@ -135,4 +173,4 @@ class ExtendedEmrCreateJobFlowOperator(BaseOperator):
 # Defining the plugin class
 class ExtendedAWSPlugin(AirflowPlugin):
     name = "extended_aws_plugin"
-    operators = [ExtendedEmrCreateJobFlowOperator]
+    operators = [ExtendedEmrCreateJobFlowOperator, AthenaStartQueryOperator]

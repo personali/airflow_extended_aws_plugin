@@ -16,3 +16,5 @@ The ExtendedEmrCreateJobFlowOperator uses the built in aws_hook and give the fol
 2. Can create an Airflow connection to the created Livy service. This can later on be used by LivySparkOperator to submit concurrent spark jobs to the cluster while keeping contact with the running jobs. Check out the airflow spark plugin supplying the ability to run jobs using Livy: https://github.com/rssanders3/airflow-spark-operator-plugin
 3. Specify the default api params inside the operator definition and not on an "emr_connection".
 
+## AthenaStartQueryOperator
+The AthenaStartQueryOperator uses the built in aws_hook and gives the ability to run queries agains AWS Athena

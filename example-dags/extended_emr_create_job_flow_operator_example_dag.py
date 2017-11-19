@@ -76,6 +76,16 @@ terminate_cluster = EmrTerminateJobFlowOperator(
     dag=dag
 )
 
+athena_refresh_partitions = AthenaStartQueryOperator(
+    task_id='athena_refresh_partitions',
+    database_name='spectrumdb',
+    query='MSCK REPAIR TABLE table_name',
+    output_location='s3://bucket/athena_output',
+    aws_conn_id='aws_default',
+    dag=dag
+)
+
 # Configure dependencies
 create_cluster >> spark_job
 spark_job >> terminate_cluster
+spark_job >> athena_refresh_partitions
